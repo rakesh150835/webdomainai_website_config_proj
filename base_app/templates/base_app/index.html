@@ -122,8 +122,9 @@
                 <div class="website-container">
                     {% if websites %}
                         {% for website in websites %}
+                          <a href="{% url 'add_website_config' website.id %}" target="_blank">
                             <div class="website-item m-3">
-                                <img src="{{ website.background_image.url }}" alt=" website " class="website-screenshot">
+                                <img src="{{ website.background_image.url }}" style="max-width: 100%; height: 100px;" alt=" website " class="website-screenshot">
                                 <div class="website-info">
                                     <span class="website-name">{{ website.name }}</span><br>
                                     {% comment %} <span class="warning-icon">⚠️</span> {% endcomment %}
@@ -132,6 +133,7 @@
                                     <span class="website-url">{{ website.url }}</span>
                                 </div>
                             </div>
+                          </a>
                         {% endfor %}
                     {% endif %}
                 

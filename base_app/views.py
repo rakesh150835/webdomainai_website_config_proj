@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Website, WebsiteConfiguration
 
 from django.core.files.base import ContentFile
@@ -16,12 +16,6 @@ def home(request):
     return render(request, 'base_app/index.html', context)
 
 
-def resize_image(image, size=(100, 100)):
-    img = Image.open(image)
-    img.thumbnail(size)
-    img_io = BytesIO()
-    img.save(img_io, format='JPEG', quality=85)
-    return ContentFile(img_io.getvalue(), name=image.name)
 
 
 def add_website(request):
@@ -29,12 +23,11 @@ def add_website(request):
         name = request.POST.get('name')
         url = request.POST.get('url')
         background_image = request.FILES.get('background_image')
-        resized_image = resize_image(background_image)
 
         Website.objects.create(
             name=name,
             url=url,
-            background_image=resized_image
+            background_image=background_image
         )
         return redirect('home')  
 
@@ -42,24 +35,30 @@ def add_website(request):
 
 
 
-def add_website_configuration(request):
+def add_website_configuration(request, website_id=None):
+    if website_id:
+        website = get_object_or_404(Website, pk=website_id)  # Fetch existing website to update
+
+        websiteConfig = website.websiteconfiguration
+        #print("web confi heading_text-----", websiteConfig.heading_text)
+    else:
+        websiteConfig = WebsiteConfiguration()
+
     if request.method == 'POST':
-        licence_key = request.POST.get('licence_key')
-        heading_text = request.POST.get('heading_text')
-        welcome_message = request.POST.get('welcome_message')
-        chatbot_image = request.FILES.get('chatbot_image')
-        send_message_icon = request.FILES.get('send_message_icon')
-        send_message_icon = request.FILES.get('color_scheme')
+        websiteConfig.licence_key = request.POST.get('licence_key')
+        websiteConfig.heading_text = request.POST.get('heading_text')
+        websiteConfig.welcome_message = request.POST.get('welcome_message')
         
-        WebsiteConfiguration.objects.create(
-            licence_key=licence_key,
-            chatbot_image=chatbot_image,
-            heading_text=heading_text,
-            welcome_message=welcome_message,
-            send_message_icon=send_message_icon,
-            color_scheme=color_scheme
-        )
+        if 'background_image' in request.FILES:
+            websiteConfig.chatbot_image = request.FILES.get('chatbot_image')
+        if 'background_image' in request.FILES:
+            websiteConfig.send_message_icon = request.FILES.get('send_message_icon')
+
+        websiteConfig.color_scheme = request.POST.get('color_scheme')
+        
+        websiteConfig.save()
         
         return redirect('home')  
 
-    return render(request, 'WebsiteConfiguration.html')
+    #print("website configuration:  ", websiteConfig)
+    return render(request, 'base_app/WebsiteConfiguration.html', {'websiteconfig': websiteConfig})
