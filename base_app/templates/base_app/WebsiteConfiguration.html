@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -100,23 +102,140 @@
             color: #34495e;
             margin-bottom: 5px;
         }
+
+        main{
+            display: flex;
+
+        }
+
+        .left_slide_sec{
+            width: 5%;
+        }
+
+        .main_right_slide_sec{
+            width: 95%;
+        }
+
+        .user-info img{
+            height: 40px;
+            width: 40px;
+            object-fit: cover;
+            border-radius: 100%;
+        }
+
+        .header_bg_sec {
+            background-color: #2c454c;
+            height: 60px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .header_bg_sec h1{
+            color: #e1e1e1;
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+
+        }
+
+        .user-info .user-dropdown{
+            background-color: transparent;
+            color: #e1d8d8;
+            border: none;
+
+        }
+
+        .user-info .user-dropdown:focus-visible{
+            outline: none;
+        }
+
+        .back-btn-sec {
+            margin: 20px;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #2c454c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background-color: #2980b9;
+            transform: translateX(-5px);
+        }
+        .back-btn svg {
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover svg {
+            transform: translateX(-3px);
+        }
+
+        .cencle_btn{
+            background-color: #2c454c;
+            color: white;
+            
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div class="header_bg_sec">
+            <h1>Manage Website</h1>
+            <div class="user-info">
+                <select id="user-dropdown" class="user-dropdown">
+                    <option value="email">{{ request.user.email }}</option>
+                    <option value="logout">Logout</option>
+                </select>
+                <img src="{% static 'base_app/icons/user_avatar.png' %}" alt="User Avatar" class="user-avatar">
+            </div>
+        </div>
+    </header>
+    <div class="back-btn-sec">
+        <a href="{% url 'home' %}">
+            <button class="back-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back
+            </button>
+        </a>
+    </div>
     <div class="container settings-container">
         <p class="text-muted mb-4">Here you can define the values for chat bot options</p>
         
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+            {% endif %}
+
             <div class="mb-4">
-                <input type="text" class="form-control" value="{{ websiteConfig.licence_key }}" name="licence_key" placeholder="License Key">
+                <label for="headingText" class="form-label">Heading Text</label>
+                <textarea class="form-control" id="headingText" rows="2" name="heading_text" placeholder="Enter heading text">{{ websiteConfig.heading_text|default:'' }}</textarea>
             </div>
             
+            <div class="mb-4">
+                <label for="welcomeMessage" class="form-label">Welcome Message</label>
+                <textarea class="form-control" id="welcomeMessage" rows="3" name="welcome_message" placeholder="Enter welcome message">{{ websiteConfig.welcome_message|default:'' }}</textarea>
+            </div>
+
             <div class="image-section mb-4">
                 <div class="image-section-title">Chat Bot Image</div>
                 <div class="d-flex align-items-center">
-                    {% if websiteConfig.chatbot_image %}
-                        <img src="{{ websiteConfig.chatbot_image.url }}" alt="Current chatbot Image" style="max-width: 100px; max-height: 100px;"><br>
+                    {% if websiteConfig.chat_bot_image %}
+                        <img src="{{ websiteConfig.chat_bot_image.url }}" alt="Current chatbot Image" style="max-width: 100px; max-height: 100px;"><br>
                     {% else %}
                         <img src="https://via.placeholder.com/80x80/ff69b4/ffffff?text=Bot" alt="Chat Bot" class="image-preview">
                     {% endif %}
@@ -127,21 +246,10 @@
                         <button type="button" class="btn btn-upload" id="remove_image" onclick="removeImage('chatbot_image')">
                             <i class="fas fa-trash-alt me-2"></i>Remove Image
                         </button>
-                        <!-- Hidden input for uploading an image -->
-                        <input type="file" id="chatbot_image" class="btn btn-upload" name="chatbot_image" accept="image/*" >
+                        <input type="file" id="chatbot_image" class="btn btn-upload" name="chatbot_image" >
                     </div>
 
                 </div>
-            </div>
-            
-            <div class="mb-4">
-                <label for="headingText" class="form-label">Heading Text</label>
-                <textarea class="form-control" id="headingText" rows="2" value="{{ websiteConfig.heading_text }}" name="heading_text" placeholder="Enter heading text"></textarea>
-            </div>
-            
-            <div class="mb-4">
-                <label for="welcomeMessage" class="form-label">Welcome Message</label>
-                <textarea class="form-control" id="welcomeMessage" rows="3" value="{{ websiteConfig.welcome_message }}" name="welcome_message" placeholder="Enter welcome message"></textarea>
             </div>
             
             <div class="image-section mb-4">
@@ -158,8 +266,7 @@
                         <button type="button" class="btn btn-upload" id="remove_image" onclick="removeImage('send_message_icon')">
                             <i class="fas fa-trash-alt me-2"></i>Remove Image
                         </button>
-                        <!-- Hidden input for uploading an image -->
-                        <input type="file" id="send_message_icon" class="btn btn-upload" name="send_message_icon" accept="image/*" >
+                        <input type="file" id="send_message_icon" class="btn btn-upload" name="send_message_icon">
                     </div>
 
                 </div>
@@ -171,6 +278,8 @@
             </div>
             
             <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save Changes</button>
+            <button type="button" class="btn btn-primary cencle_btn" onclick="window.location.href='{% url 'home' %}'">Cancel</button>
+
         </form>
     </div>
 
@@ -184,7 +293,14 @@
 
             // Optionally, add logic to indicate in the UI that the image has been removed
             alert("Image removed for " + inputId + "!");
-        }
+        };
+
+        document.getElementById('user-dropdown').addEventListener('change', function() {
+            if (this.value === 'logout') {
+                // Redirect to Django's logout view
+                window.location.href = "{% url 'logout_user' %}";
+            }
+        });
     </script>
 
 </body>

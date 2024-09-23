@@ -14,7 +14,6 @@ class Website(models.Model):
     def save(self, *args, **kwargs):
         # Call the original save method
         super().save(*args, **kwargs)
-        
         # Create a UserProfile instance if it doesn't exist
         WebsiteConfiguration.objects.get_or_create(website=self)
 
@@ -24,14 +23,12 @@ class Website(models.Model):
 
 class WebsiteConfiguration(models.Model):
     website = models.OneToOneField(Website, on_delete=models.CASCADE)
-    licence_key = models.CharField(max_length=250, unique=True, null=True, blank=True)
-    chatbot_image = models.ImageField(upload_to='chatbot_images/')
+    chat_bot_image = models.ImageField(upload_to='chatbot_images/')
     heading_text = models.CharField(max_length=500, null=True, blank=True)
-    welcome_message = models.TextField(null=True, blank=True)
+    welcome_message = models.TextField(max_length=700, null=True, blank=True)
     send_message_icon = models.ImageField(upload_to='send_message_icons/')
     color_scheme = models.CharField(max_length=7, null=True, blank=True)
 
     
     def __str__(self):
-        return self.licence_key
-
+        return self.website.name
